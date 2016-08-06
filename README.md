@@ -61,7 +61,7 @@ export GD_SECRET=your_secret_here
 
 # run letsencrypt.sh in "cron" mode (-c)
 # this creates CSRs, keys and everything we need automatically for us.
-./letsencrypt.sh --challenge dns-01 -p account.key -k $ROOT/le-godaddy-dns/godaddy.py -c
+./letsencrypt.sh --challenge dns-01 -k $ROOTDIR/le-godaddy-dns/godaddy.py -c
 
 ````
 
