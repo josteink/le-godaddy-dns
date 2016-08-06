@@ -68,6 +68,9 @@ export GD_SECRET=your_secret_here
 You should now have your certs, and the output should tell you where
 they are.
 
+You can put the last section in a script and add as a cronjob to
+ensure your certificates gets auto-renewed.
+
 You can optionally inspect that they look like they should
 
 ````bash
@@ -75,11 +78,8 @@ find . -name fullchain.pem -exec openssl x509 -in '{}' -text -noout \;
 find . -name fullchain.pem -exec openssl x509 -in '{}' -subject -noout \;
 ````
 
-You can put the last section in a script and add as a cronjob to
-ensure your certificates gets auto-renewed.
-
 You may also decide to customize the `deploy_certificates` hook in
-`le-goddady-dns.py` if you want the certificates automatically copied
+`goddady.py` if you want the certificates automatically copied
 to another destination than the one provided by `letsencrypt.sh`.
 
 # Disclaimer
