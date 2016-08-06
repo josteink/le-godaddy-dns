@@ -14,7 +14,7 @@ To use this module you will need the following:
 * python3
 * godaddypy python3 module
 * [Production Godaddy API keys](https://developer.godaddy.com/keys/)
-* Whatever `letsencrypt.sh` depends on
+* OpenSSL (or basically whatever `letsencrypt.sh` depends on)
 
 ## Usage
 
