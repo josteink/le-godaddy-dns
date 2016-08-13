@@ -11,6 +11,7 @@ against Godaddy DNS.
 
 To use this module you will need the following:
 
+* curl
 * python3
 * godaddypy python3 module
 * [Production Godaddy API keys](https://developer.godaddy.com/keys/)
@@ -27,7 +28,7 @@ First you need to download all dependencies and configure `letsencrypt.sh`.
 
 ````bash
 # get dependencies
-sudo apt-get install python3 python3-pip
+sudo apt-get install python3 python3-pip curl
 python3 -m pip install --user godaddypy
 
 # setup a workplace
