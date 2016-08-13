@@ -27,7 +27,7 @@ First you need to download all dependencies and configure `letsencrypt.sh`.
 
 ````bash
 # get dependencies
-sudo apt-get install python3
+sudo apt-get install python3 python3-pip
 python3 -m pip install --user godaddypy
 
 # setup a workplace
