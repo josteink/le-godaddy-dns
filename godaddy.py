@@ -44,7 +44,7 @@ def _update_dns(domain, token):
     record = {
         'name': subdomain,
         'data': token,
-        'ttl': 300,
+        'ttl': 600,
         'type': 'TXT'
     }
     result = client.update_record(zone, record)
