@@ -3,8 +3,8 @@
 
 le-godaddy-dns is a [Let's encrypt](https://letsencrypt.org/) module,
 designed to be used as a hook with
-[letsencrypt.sh](https://github.com/lukas2511/letsencrypt.sh) for
-[DNS-based validation](https://github.com/lukas2511/letsencrypt.sh/blob/master/docs/dns-verification.md)
+[dehydrated](https://github.com/lukas2511/dehydrated) for
+[DNS-based validation](https://github.com/lukas2511/dehydrated/blob/master/docs/dns-verification.md)
 against Godaddy DNS.
 
 ## Prerequisites
@@ -15,7 +15,7 @@ To use this module you will need the following:
 * python3
 * godaddypy python3 module
 * [Production Godaddy API keys](https://developer.godaddy.com/keys/)
-* OpenSSL (or basically whatever `letsencrypt.sh` depends on)
+* OpenSSL (or basically whatever `dehydrated` depends on)
 
 ## Usage
 
@@ -37,16 +37,16 @@ mkdir -p $ROOTDIR
 cd $ROOTDIR
 
 # get letsencrypt.sh
-git clone https://github.com/lukas2511/letsencrypt.sh
+git clone https://github.com/lukas2511/dehydrated
 # get le-godaddy-dns
 git clone https://github.com/josteink/le-godaddy-dns
 
-# configure letsencrypt.sh
-cd $ROOTDIR/letsencrypt.sh
+# configure dehydrated
+cd $ROOTDIR/dehydrated
 nano domains.txt
 
 # the format for domains.txt is documented in letsencrypt.sh's repo.
-# https://github.com/lukas2511/letsencrypt.sh/blob/master/docs/domains_txt.md
+# https://github.com/lukas2511/dehydrated/blob/master/docs/domains_txt.md
 cat domains.txt
 mydomain.com sub.mydomain.com
 example.com
@@ -62,7 +62,7 @@ export GD_SECRET=your_secret_here
 
 # run letsencrypt.sh in "cron" mode (-c)
 # this creates CSRs, keys and everything we need automatically for us.
-./letsencrypt.sh --challenge dns-01 -k $ROOTDIR/le-godaddy-dns/godaddy.py -c
+./dehydrated --challenge dns-01 -k $ROOTDIR/le-godaddy-dns/godaddy.py -c
 
 ````
 
