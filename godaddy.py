@@ -74,6 +74,8 @@ def deploy_cert(args):
 def unchanged_cert(args):
     return
 
+def exit_hook(args):
+    pass
 
 def main(argv):
     ops = {
@@ -81,6 +83,7 @@ def main(argv):
         'clean_challenge' : delete_txt_record,
         'deploy_cert'     : deploy_cert,
         'unchanged_cert'  : unchanged_cert,
+        'exit_hook'       : exit_hook,
     }
     logger.info(" + Godaddy hook executing: {0}".format(argv[0]))
     ops[argv[0]](argv[1:])
