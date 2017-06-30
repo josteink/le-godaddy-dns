@@ -74,8 +74,16 @@ def deploy_cert(args):
 def unchanged_cert(args):
     return
 
+
+def invalid_challenge(args):
+    [domain, response] = args
+    logger.warn(" + invalid challenge for domain {0}: {1}".format(domain, response))
+    return
+
+
 def exit_hook(args):
     pass
+
 
 def main(argv):
     ops = {
@@ -83,6 +91,7 @@ def main(argv):
         'clean_challenge' : delete_txt_record,
         'deploy_cert'     : deploy_cert,
         'unchanged_cert'  : unchanged_cert,
+        'invalid_challenge': invalid_challenge,
         'exit_hook'       : exit_hook,
     }
     logger.info(" + Godaddy hook executing: {0}".format(argv[0]))
