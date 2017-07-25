@@ -84,6 +84,9 @@ def invalid_challenge(args):
 def exit_hook(args):
     pass
 
+def startup_hook(args):
+    pass
+
 
 def main(argv):
     ops = {
@@ -93,6 +96,7 @@ def main(argv):
         'unchanged_cert'  : unchanged_cert,
         'invalid_challenge': invalid_challenge,
         'exit_hook'       : exit_hook,
+        'startup_hook'    : startup_hook,
     }
     logger.info(" + Godaddy hook executing: {0}".format(argv[0]))
     ops[argv[0]](argv[1:])
