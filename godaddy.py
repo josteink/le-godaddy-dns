@@ -61,7 +61,11 @@ def delete_txt_record(args):
     domain = args[0]
     # using client.delete_record() is dangerous. null it instead!
     # https://github.com/eXamadeus/godaddypy/issues/13
-    _update_dns(domain, "null")
+
+    if domain == "":
+        logger.warn("Error deleting record, the domain argument is empty")
+    else:
+        _update_dns(domain, "null")
 
 
 def deploy_cert(args):
@@ -80,6 +84,10 @@ def invalid_challenge(args):
     logger.warn(" + invalid challenge for domain {0}: {1}".format(domain, response))
     return
 
+def request_failure(args):
+    [status_code, err_txt, req_type] = args
+    logger.warn(" + Request failed with status code: {0}, {1}, type: {2}".format(status_code, err_txt, req_type))
+    return
 
 def exit_hook(args):
     pass
@@ -95,6 +103,7 @@ def main(argv):
         'deploy_cert'     : deploy_cert,
         'unchanged_cert'  : unchanged_cert,
         'invalid_challenge': invalid_challenge,
+        'request_failure' : request_failure,
         'exit_hook'       : exit_hook,
         'startup_hook'    : startup_hook,
     }
