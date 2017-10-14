@@ -3,6 +3,8 @@
 import os
 import sys
 import logging
+from tld import get_tld
+import time
 import godaddypy
 
 if "GD_KEY" not in os.environ:
@@ -17,15 +19,13 @@ my_acct = godaddypy.Account(api_key=api_key, api_secret=api_secret)
 client = godaddypy.Client(my_acct)
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
+logger.addHandler(logging.NullHandler())
 logger.setLevel(logging.INFO)
 
 
 def _get_zone(domain):
-    parts = domain.split(".")
-    zone_parts = parts[-2::]
-    zone = ".".join(zone_parts)
-    return zone
+    d = get_tld(domain,as_object=True,fix_protocol=True)
+    return d.tld
 
 
 def _get_subdomain_for(domain, zone):
@@ -55,6 +55,8 @@ def _update_dns(domain, token):
 def create_txt_record(args):
     domain, token = args[0], args[2]
     _update_dns(domain, token)
+    # a sleep is needed to allow DNS propagation
+    time.sleep(30)
 
 
 def delete_txt_record(args):
