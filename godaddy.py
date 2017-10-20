@@ -19,7 +19,7 @@ my_acct = godaddypy.Account(api_key=api_key, api_secret=api_secret)
 client = godaddypy.Client(my_acct)
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 
