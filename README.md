@@ -15,7 +15,7 @@ To use this module you will need the following:
 
 * curl
 * python3
-* godaddypy python3 module
+* godaddypy & tld python3 module
 * [Production Godaddy API keys](https://developer.godaddy.com/keys/)
 * OpenSSL (or basically whatever `dehydrated` depends on)
 
@@ -31,7 +31,6 @@ First you need to download all dependencies and configure `letsencrypt.sh`.
 ````bash
 # get dependencies
 sudo apt-get install python3 python3-pip curl
-python3 -m pip install --user godaddypy
 
 # setup a workplace
 ROOTDIR=$HOME/letsencrypt
@@ -42,6 +41,8 @@ cd $ROOTDIR
 git clone https://github.com/lukas2511/dehydrated
 # get le-godaddy-dns
 git clone https://github.com/josteink/le-godaddy-dns
+cd $ROOTDIR/le-godaddy-dns
+python3 -m pip install -r requirements.txt --user
 
 # configure dehydrated
 cd $ROOTDIR/dehydrated
