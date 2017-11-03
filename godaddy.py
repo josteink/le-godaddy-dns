@@ -53,21 +53,23 @@ def _update_dns(domain, token):
 
 
 def create_txt_record(args):
-    domain, token = args[0], args[2]
-    _update_dns(domain, token)
+    for i in range(0, len(args), 3):
+        domain, token = args[i], args[i+2]
+        _update_dns(domain, token)
     # a sleep is needed to allow DNS propagation
     time.sleep(30)
 
 
 def delete_txt_record(args):
-    domain = args[0]
-    # using client.delete_record() is dangerous. null it instead!
-    # https://github.com/eXamadeus/godaddypy/issues/13
+    for i in range(0, len(args), 3):
+        domain = args[i]
+        # using client.delete_record() is dangerous. null it instead!
+        # https://github.com/eXamadeus/godaddypy/issues/13
 
-    if domain == "":
-        logger.warn("Error deleting record, the domain argument is empty")
-    else:
-        _update_dns(domain, "null")
+        if domain == "":
+            logger.warn("Error deleting record, the domain argument is empty")
+        else:
+            _update_dns(domain, "null")
 
 
 def deploy_cert(args):
