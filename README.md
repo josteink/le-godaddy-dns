@@ -56,6 +56,22 @@ example.com
 ...
 ````
 
+This step is optional, but it's recommended for reduced runtime 
+if you have many subdomains. Dehydrated gives you the option to 
+update multiple subdomains at the same time and then verify them all 
+instead of updating and verifying each subdomain individually.
+
+````bash
+# open your config file for dehydrated
+# Note: you can also edit the configuration elsewere if you want
+# https://github.com/lukas2511/dehydrated/#config
+nano $ROOTDIR/dehydrated/config
+
+# Locate the line #HOOK_CHAIN="no"
+# Uncomment the line and change the value to yes
+HOOK_CHAIN="yes"
+````
+
 Now you need to configure `le-godaddy-dns` and retrieve your certs.
 
 ````bash
