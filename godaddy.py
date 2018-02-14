@@ -79,10 +79,6 @@ def deploy_cert(args):
     return
 
 
-def unchanged_cert(args):
-    return
-
-
 def invalid_challenge(args):
     [domain, response] = args
     logger.warn(" + invalid challenge for domain {0}: {1}".format(domain, response))
@@ -93,10 +89,8 @@ def request_failure(args):
     logger.warn(" + Request failed with status code: {0}, {1}, type: {2}".format(status_code, err_txt, req_type))
     return
 
-def exit_hook(args):
-    pass
 
-def startup_hook(args):
+def noop(args):
     pass
 
 
@@ -105,14 +99,22 @@ def main(argv):
         'deploy_challenge': create_txt_record,
         'clean_challenge' : delete_txt_record,
         'deploy_cert'     : deploy_cert,
-        'unchanged_cert'  : unchanged_cert,
+        'unchanged_cert'  : noop,
         'invalid_challenge': invalid_challenge,
         'request_failure' : request_failure,
-        'exit_hook'       : exit_hook,
-        'startup_hook'    : startup_hook,
+        'exit_hook'       : noop,
+        'startup_hook'    : noop,
+        'generate_csr'    : noop
     }
-    logger.info(" + Godaddy hook executing: {0}".format(argv[0]))
-    ops[argv[0]](argv[1:])
+
+    opname = argv[0]
+    if "_this_hookscript_is_broken__dehydrated_is_work" in opname:
+        return
+    elif opname not in ops:
+        logger.warn("Unsupported operation: {0}. Consider filing a bug-report at {1}".format(opname, "https://github.com/josteink/le-godaddy-dns/issues"))
+    else:
+        logger.info(" + Godaddy hook executing: {0}".format(opname))
+        ops[opname](argv[1:])
 
 
 if __name__ == '__main__':
