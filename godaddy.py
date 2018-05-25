@@ -47,7 +47,13 @@ def _update_dns(domain, token):
         'ttl': 600,
         'type': 'TXT'
     }
-    result = client.update_record(zone, record)
+
+    existing_records = client.get_records(zone, record_type="TXT", name=subdomain)
+    if (len(existing_records) == 0):
+        result = client.add_record(zone, record)
+    else:
+        result = client.update_record(zone, record)
+
     if result is not True:
         logger.warn("Error updating record for domain {0}.".format(domain))
 
