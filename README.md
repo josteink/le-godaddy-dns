@@ -110,7 +110,7 @@ wildcard DNS which by best practice would register \*.foo.com and foo.com.
 If you are not requesting wildcard certs, you can disable this by setting
 the following near the top of godaddy.py.
 ````
-LE_WILDCARDS_SUPPORT = False 
+LE_WILDCARD_SUPPORT = False 
 ````
 Background: Due to limitations in GoDaddy API's, we must use their "Patch" 
 API which is essentially an add record call. By default, this will add new 
