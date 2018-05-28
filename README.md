@@ -94,7 +94,7 @@ they are.
 You can put the last section in a script and add as a cronjob to
 ensure your certificates gets auto-renewed.
 
-You can optionally inspect thatsub they look like they should
+You can optionally inspect that they look like they should
 
 ````bash
 find . -name fullchain.pem -exec openssl x509 -in '{}' -text -noout \;
