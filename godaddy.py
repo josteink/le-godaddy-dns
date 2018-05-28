@@ -62,7 +62,7 @@ def _add_dns_rec(domain, token, tries=0):
         logger.warn("Error returned {0}.".format(err))
 
     if result is not True:
-        logger.warn("Error updating recLE_WILDCARDS_SUPPORTord for domain {0}.".format(domain))
+        logger.warn("Error updating record for domain {0}.".format(domain))
         if tries < 3:
             logger.warn("Will retry in 5 seconds...")
             time.sleep(5)
