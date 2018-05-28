@@ -56,10 +56,13 @@ example.com
 ...
 ````
 
-This step is optional, but it's recommended for reduced runtime 
-if you have many subdomains. Dehydrated gives you the option to 
-update multiple subdomains at the same time and then verify them all 
-instead of updating and verifying each subdomain individually.
+This step is optional, but recommended for reduced runtime 
+if you have many domains (SAN Cert.). Dehydrated gives you the option to 
+process multiple domains in wall call to the hook script, saving 
+resource overhead and pauses for dns propagation with each call. 
+Note however, that Dehydrated will first populate all challenges
+before verifying them in a second loop. This was not always the case but was
+implemented to correct some edge failures.
 
 ````bash
 # open your config file for dehydrated
@@ -91,7 +94,7 @@ they are.
 You can put the last section in a script and add as a cronjob to
 ensure your certificates gets auto-renewed.
 
-You can optionally inspect that they look like they should
+You can optionally inspect thatsub they look like they should
 
 ````bash
 find . -name fullchain.pem -exec openssl x509 -in '{}' -text -noout \;
@@ -101,6 +104,19 @@ find . -name fullchain.pem -exec openssl x509 -in '{}' -subject -noout \;
 You may also decide to customize the `deploy_certificates` hook in
 `goddady.py` if you want the certificates automatically copied
 to another destination than the one provided by `letsencrypt.sh`.
+
+This program is designed presently to assume that users will be registering
+wildcard DNS which by best practice would register \*.foo.com and foo.com.
+If you are not requesting wildcard certs, you can disable this by setting
+the following in the top of godaddy.py (hard coded to False)
+````
+GDPY_NO_WILDCARDS = True 
+````
+Background: Due to limitations in GoDaddy API's, we must use their "Patch" 
+API which is essentially an add record call. By default, this will add new 
+records each time the script is called. Unfortunately, the "Update" API
+call does not work for wildcard certs if you need both \*.foo.com and foo.com
+in the cert.
 
 # Disclaimer
 
