@@ -9,7 +9,7 @@ import godaddypy
 
 # Override this to False, if you are not using wildcards and
 # do not want to have new records added in DNS
-LE_WILDCARDS_SUPPORT = True
+LE_WILDCARD_SUPPORT = True
 
 if "GD_KEY" not in os.environ:
     raise Exception("Missing Godaddy API-key in GD_KEY environment variable! Please register one at https://developer.godaddy.com/keys/")
@@ -102,10 +102,10 @@ def _update_dns(domain, token):
 
 
 def create_txt_record(args):
-    global LE_WILDCARDS_SUPPORT
+    global LE_WILDCARD_SUPPORT
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
-        if LE_WILDCARDS_SUPPORT:
+        if LE_WILDCARD_SUPPORT:
             _add_dns_rec(domain, token)
         else:
             _update_dns(domain, token)
