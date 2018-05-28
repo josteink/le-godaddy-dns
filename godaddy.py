@@ -7,6 +7,10 @@ from tld import get_tld
 import time
 import godaddypy
 
+# Override this to False, if you are not using wildcards and
+# do not want to have new records added in DNS
+LE_WILDCARD_SUPPORT = True
+
 if "GD_KEY" not in os.environ:
     raise Exception("Missing Godaddy API-key in GD_KEY environment variable! Please register one at https://developer.godaddy.com/keys/")
 
@@ -16,6 +20,7 @@ if "GD_SECRET" not in os.environ:
 api_key = os.environ["GD_KEY"]
 api_secret = os.environ["GD_SECRET"]
 my_acct = godaddypy.Account(api_key=api_key, api_secret=api_secret)
+
 client = godaddypy.Client(my_acct)
 
 logger = logging.getLogger(__name__)
@@ -33,6 +38,44 @@ def _get_subdomain_for(domain, zone):
     return subdomain
 
 
+def _add_dns_rec(domain, token, tries=0):
+    challengedomain = "_acme-challenge." + domain
+    logger.info(" + Adding TXT record for {0} to '{1}'.".format(challengedomain, token))
+    zone = _get_zone(challengedomain)
+    # logger.info("Zone to update: {0}".format(zone))
+    subdomain = _get_subdomain_for(challengedomain, zone)
+    # logger.info("Subdomain name: {0}".format(subdomain))
+
+    record = {
+        'name': subdomain,
+        'data': token,
+        'ttl': 600,
+        'type': 'TXT'
+    }
+    result=None
+    try:
+        result = client.add_record(zone, record)
+    except godaddypy.client.BadResponse as err:
+        msg=str(err)
+        if msg.find('DUPLICATE_RECORD') > -1:
+            logger.info(" + . Duplicate record found. Skipping.")
+            return
+        logger.warn("Error returned {0}.".format(err))
+    except Exception as err:
+        logger.warn("Error returned {0}.".format(err))
+
+    if result is not True:
+        logger.warn("Error adding record for domain {0}.".format(domain))
+        if tries < 3:
+            logger.warn("Will retry in 5 seconds...")
+            time.sleep(5)
+            _add_dns_rec(domain, token, tries+1)
+        else:
+            logger.warn("Giving up after 3 tries...")
+    else:
+        logger.info(" + . Record added")
+
+        
 def _update_dns(domain, token):
     challengedomain = "_acme-challenge." + domain
     logger.info(" + Updating TXT record for {0} to '{1}'.".format(challengedomain, token))
@@ -59,10 +102,18 @@ def _update_dns(domain, token):
 
 
 def create_txt_record(args):
+    global LE_WILDCARD_SUPPORT
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
-        _update_dns(domain, token)
+        if LE_WILDCARD_SUPPORT:
+            _add_dns_rec(domain, token)
+        else:
+            _update_dns(domain, token)
+        # Sleep between calls to avoid godaddy rate limits
+        # Acccording to their docs its 60 calls per minute
+        time.sleep(1)
     # a sleep is needed to allow DNS propagation
+    logger.info(" + Sleeping to wait for DNS propagation")
     time.sleep(30)
 
 
@@ -75,7 +126,7 @@ def delete_txt_record(args):
         if domain == "":
             logger.warn("Error deleting record, the domain argument is empty")
         else:
-            _update_dns(domain, "null")
+            _update_dns(domain, "(le_godaddy_dns) please delete me")
 
 
 def deploy_cert(args):
