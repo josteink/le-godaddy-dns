@@ -108,9 +108,9 @@ to another destination than the one provided by `letsencrypt.sh`.
 This program is designed presently to assume that users will be registering
 wildcard DNS which by best practice would register \*.foo.com and foo.com.
 If you are not requesting wildcard certs, you can disable this by setting
-the following in the top of godaddy.py (hard coded to False)
+the following near the top of godaddy.py.
 ````
-GDPY_NO_WILDCARDS = True 
+LE_WILDCARDS_SUPPORT = False 
 ````
 Background: Due to limitations in GoDaddy API's, we must use their "Patch" 
 API which is essentially an add record call. By default, this will add new 
