@@ -17,10 +17,9 @@ if "GD_KEY" not in os.environ:
 if "GD_SECRET" not in os.environ:
     raise Exception("Missing Godaddy API-secret in GD_SECRET environment variable! Please register one at https://developer.godaddy.com/keys/")
 
-my_acct = godaddypy.Account(
-    api_key=os.environ["GD_KEY"], 
-    api_secret=os.environ["GD_SECRET"]
-)
+api_key = os.environ["GD_KEY"]
+api_secret = os.environ["GD_SECRET"]
+my_acct = godaddypy.Account(api_key=api_key, api_secret=api_secret)
 
 client = godaddypy.Client(my_acct)
 
