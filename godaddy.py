@@ -27,13 +27,16 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
+
 def _get_zone(domain):
     d = get_tld(domain,as_object=True,fix_protocol=True)
     return d.tld
 
+
 def _get_subdomain_for(domain, zone):
     subdomain = domain[0:(-len(zone)-1)]
     return subdomain
+
 
 def _add_dns_rec(domain, token, tries=0):
     challengedomain = "_acme-challenge." + domain
@@ -72,6 +75,7 @@ def _add_dns_rec(domain, token, tries=0):
     else:
         logger.info(" + . Record added")
 
+        
 def _update_dns(domain, token):
     challengedomain = "_acme-challenge." + domain
     logger.info(" + Updating TXT record for {0} to '{1}'.".format(challengedomain, token))
