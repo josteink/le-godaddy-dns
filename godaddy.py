@@ -7,9 +7,9 @@ from tld import get_tld
 import time
 import godaddypy
 
-# Override this to True, if you are not using wildcards and
-# . Do not want to have new records added in DNS
-GDPY_NO_WILDCARDS = False
+# Override this to False, if you are not using wildcards and
+# do not want to have new records added in DNS
+LE_WILDCARDS_SUPPORT = True
 
 if "GD_KEY" not in os.environ:
     raise Exception("Missing Godaddy API-key in GD_KEY environment variable! Please register one at https://developer.godaddy.com/keys/")
@@ -63,7 +63,7 @@ def _add_dns_rec(domain, token, tries=0):
         logger.warn("Error returned {0}.".format(err))
 
     if result is not True:
-        logger.warn("Error updating record for domain {0}.".format(domain))
+        logger.warn("Error updating recLE_WILDCARDS_SUPPORTord for domain {0}.".format(domain))
         if tries < 3:
             logger.warn("Will retry in 5 seconds...")
             time.sleep(5)
@@ -99,13 +99,13 @@ def _update_dns(domain, token):
 
 
 def create_txt_record(args):
-    global GDPY_NO_WILDCARDS
+    global LE_WILDCARDS_SUPPORT
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
-        if GDPY_NO_WILDCARDS:
-            _update_dns(domain, token)
-        else:
+        if LE_WILDCARDS_SUPPORT:
             _add_dns_rec(domain, token)
+        else:
+            _update_dns(domain, token)
         # Sleep between calls to avoid godaddy rate limits
         # Acccording to their docs its 60 calls per minute
         time.sleep(1)
