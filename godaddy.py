@@ -7,8 +7,7 @@ from tld import get_tld
 import time
 import godaddypy
 
-# Override this to False, if you are not using wildcards and
-# do not want to have new records added in DNS
+# See readme.md for explanation of this flag
 LE_WILDCARD_SUPPORT = True
 
 if "GD_KEY" not in os.environ:
