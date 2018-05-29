@@ -16,9 +16,8 @@ if "GD_KEY" not in os.environ:
 if "GD_SECRET" not in os.environ:
     raise Exception("Missing Godaddy API-secret in GD_SECRET environment variable! Please register one at https://developer.godaddy.com/keys/")
 
-api_key = os.environ["GD_KEY"]
-api_secret = os.environ["GD_SECRET"]
-my_acct = godaddypy.Account(api_key=api_key, api_secret=api_secret)
+env=os.environ
+my_acct = godaddypy.Account(api_key=env["GD_KEY"], api_secret=env["GD_SECRET"])
 
 client = godaddypy.Client(my_acct)
 
@@ -32,18 +31,22 @@ def _get_zone(domain):
     return d.tld
 
 
-def _get_subdomain_for(domain, zone):
+def _get_subdomain(domain, zone):
     subdomain = domain[0:(-len(zone)-1)]
     return subdomain
 
 
-def _add_dns_rec(domain, token, tries=0):
+def _get_txt_records(domain):
+    txt_records = client.get_records(zone, record_type="TXT", name=domain)
+    return txt_records
+
+
+def _set_token_in_dns(domain, token, do_update=False, tries=0):
+    logger.info("_set_token_in_dns() called. domain={}, token={}, tries={}".format(domain, token, tries))
+    global LE_WILDCARD_SUPPORT
     challengedomain = "_acme-challenge." + domain
-    logger.info(" + Adding TXT record for {0} to '{1}'.".format(challengedomain, token))
     zone = _get_zone(challengedomain)
-    # logger.info("Zone to update: {0}".format(zone))
-    subdomain = _get_subdomain_for(challengedomain, zone)
-    # logger.info("Subdomain name: {0}".format(subdomain))
+    subdomain = _get_subdomain(challengedomain, zone)
 
     record = {
         'name': subdomain,
@@ -51,66 +54,52 @@ def _add_dns_rec(domain, token, tries=0):
         'ttl': 600,
         'type': 'TXT'
     }
+
+    verb='add'
+    gd_api = client.add_record
+    
+    if do_update or not LE_WILDCARD_SUPPORT:
+        if do_update or len(_get_txt_records(subdomain)) > 0:
+            if not do_update and domain.find('*') > -1:
+                logger.warn("+ Warning - Wildcard URL dectected, but LE_WILDCARD_SUPPORT is set to False. If valiation fails, please set LE_WILDCARD_SUPPORT to True and run again.")
+            verb='update'
+            gd_api = client.update_record
+
+    logger.info(" + {} TXT record for {}. token = '{}'.".format(
+        verb.capitalize(), challengedomain, token))
+
     result=None
     try:
-        result = client.add_record(zone, record)
+        result = gd_api(zone, record)
     except godaddypy.client.BadResponse as err:
         msg=str(err)
         if msg.find('DUPLICATE_RECORD') > -1:
             logger.info(" + . Duplicate record found. Skipping.")
             return
-        logger.warn("Error returned {0}.".format(err))
+        logger.warn("Error returned during {}: {}.".format(verb, err))
     except Exception as err:
-        logger.warn("Error returned {0}.".format(err))
+        logger.warn("Error returned during {}: {}.".format(verb, err))
 
     if result is not True:
-        logger.warn("Error adding record for domain {0}.".format(domain))
+        logger.warn("Error {}ing record for domain {}.".format(verb, domain))
         if tries < 3:
             logger.warn("Will retry in 5 seconds...")
             time.sleep(5)
-            _add_dns_rec(domain, token, tries+1)
+            _set_token_in_dns(domain, token, do_update, tries+1)
         else:
-            logger.warn("Giving up after 3 tries...")
-    else:
-        logger.info(" + . Record added")
-
-        
-def _update_dns(domain, token):
-    challengedomain = "_acme-challenge." + domain
-    logger.info(" + Updating TXT record for {0} to '{1}'.".format(challengedomain, token))
-    zone = _get_zone(challengedomain)
-    # logger.info("Zone to update: {0}".format(zone))
-    subdomain = _get_subdomain_for(challengedomain, zone)
-    # logger.info("Subdomain name: {0}".format(subdomain))
-
-    record = {
-        'name': subdomain,
-        'data': token,
-        'ttl': 600,
-        'type': 'TXT'
-    }
-
-    existing_records = client.get_records(zone, record_type="TXT", name=subdomain)
-    if (len(existing_records) == 0):
-        result = client.add_record(zone, record)
-    else:
-        result = client.update_record(zone, record)
-
-    if result is not True:
-        logger.warn("Error updating record for domain {0}.".format(domain))
-
-
-def create_txt_record(args):
-    global LE_WILDCARD_SUPPORT
-    for i in range(0, len(args), 3):
-        domain, token = args[i], args[i+2]
-        if LE_WILDCARD_SUPPORT:
-            _add_dns_rec(domain, token)
-        else:
-            _update_dns(domain, token)
+            logger.warn("Giving up after 3 tries {}ing dns...".format(verb))
+    else: # Success
+        logger.info(" + . Record {}ed".format(verb))        
         # Sleep between calls to avoid godaddy rate limits
         # Acccording to their docs its 60 calls per minute
         time.sleep(1)
+
+
+# Begin hooks
+def create_txt_record(args):
+    for i in range(0, len(args), 3):
+        domain, token = args[i], args[i+2]
+        _set_token_in_dns(domain, token)
     # a sleep is needed to allow DNS propagation
     logger.info(" + Sleeping to wait for DNS propagation")
     time.sleep(30)
@@ -123,29 +112,29 @@ def delete_txt_record(args):
         # https://github.com/eXamadeus/godaddypy/issues/13
 
         if domain == "":
-            logger.warn("Error deleting record, the domain argument is empty")
+            logger.warn("delete_txt_record() error. The domain argument is empty")
         else:
-            _update_dns(domain, "(le_godaddy_dns) please delete me")
+            _set_token_in_dns(domain, "(le_godaddy_dns) please delete me", do_update=True)
 
 
 def deploy_cert(args):
     domain, privkey_pem, cert_pem, fullchain_pem, chain_pem, timestamp = args
-    logger.info(' + ssl_certificate: {0}'.format(fullchain_pem))
-    logger.info(' + ssl_certificate_key: {0}'.format(privkey_pem))
+    logger.info(' + ssl_certificate: {}'.format(fullchain_pem))
+    logger.info(' + ssl_certificate_key: {}'.format(privkey_pem))
     return
 
 
 def invalid_challenge(args):
     [domain, response] = args
-    logger.warn(" + invalid challenge for domain {0}: {1}".format(domain, response))
+    logger.warn(" + invalid challenge for domain {}: {}".format(domain, response))
     return
 
 
 def request_failure(args):
     [status_code, err_txt, req_type] = args
-    logger.warn(" + Request failed with status code: {0}, {1}, type: {2}".format(status_code, err_txt, req_type))
+    logger.warn(" + Request failed with status code: {}, {}, type: {}".format(status_code, err_txt, req_type))
     return
-
+# End Hooks
 
 def main(argv):
     ops = {
@@ -160,7 +149,7 @@ def main(argv):
     if opname not in ops:
         return
     else:
-        logger.info(" + Godaddy hook executing: {0}".format(opname))
+        logger.info(" + Godaddy hook executing: {}".format(opname))
         ops[opname](argv[1:])
 
 
