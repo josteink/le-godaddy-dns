@@ -56,7 +56,7 @@ example.com
 ...
 ````
 
-## HOOK_CHAIN
+### HOOK_CHAIN
 
 This step is required for wildcard certificates and is otherwise recommended 
 to reduced runtime if you have many domains (SAN Cert.). Dehydrated gives you
