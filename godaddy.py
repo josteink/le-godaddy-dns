@@ -7,7 +7,6 @@ from tld import get_tld
 import time
 import godaddypy
 
-
 if "GD_KEY" not in os.environ:
     raise Exception("Missing Godaddy API-key in GD_KEY environment variable! Please register one at https://developer.godaddy.com/keys/")
 
@@ -22,8 +21,6 @@ client = godaddypy.Client(my_acct)
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
-
-#logger.warn("os.environ = {}".format(os.environ))
 
 domain_hist = None
 HOOK_CHAIN = None
@@ -110,7 +107,6 @@ def create_txt_record(args):
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
         _set_token_in_dns(domain, token)
-    # a sleep is needed to allow DNS propagation
     logger.info(" + Sleeping to wait for DNS propagation")
     time.sleep(30)
 
