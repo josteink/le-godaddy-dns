@@ -105,18 +105,16 @@ You may also decide to customize the `deploy_certificates` hook in
 `goddady.py` if you want the certificates automatically copied
 to another destination than the one provided by `letsencrypt.sh`.
 
-This program is designed presently to assume that users will be registering
-wildcard DNS which by best practice would register \*.foo.com and foo.com.
-If you are not requesting wildcard certs, you can disable this by setting
-the following near the top of godaddy.py.
+This program is presently designed to assume that users will be registering
+wildcard DNS. If you are not requesting wildcard certs, you can disable this by setting
+setting the enironment variable:
 ````
 LE_WILDCARD_SUPPORT = False 
 ````
-Background: Due to limitations in GoDaddy API's, we must use their "Patch" 
-API which is essentially an add record call. By default, this will add new 
-records each time the script is called. Unfortunately, the "Update" API
-call does not work for wildcard certs if you need both \*.foo.com and foo.com
-in the cert.
+Note: By limitations in the GoDaddy API, This Wildcard Support mode outlined above will not 
+formally delete TXT records created for the Let's Encrypt validation process. We will however
+neuter their values with a generic text. Such TXT DNS records should not cause a problem and 
+can be deleted at any time after the dehydrated scripts are complete.
 
 # Disclaimer
 
