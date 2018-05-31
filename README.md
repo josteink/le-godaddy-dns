@@ -56,10 +56,12 @@ example.com
 ...
 ````
 
-This step is optional, but it's recommended for reduced runtime 
-if you have many subdomains. Dehydrated gives you the option to 
-update multiple subdomains at the same time and then verify them all 
-instead of updating and verifying each subdomain individually.
+## HOOK_CHAIN
+
+This step is required for wildcard certificates and is otherwise recommended 
+to reduced runtime if you have many domains (SAN Cert.). Dehydrated gives you
+the option to process multiple domains in wall call to the hook script, saving 
+resource overhead and pauses for dns propagation with each call.
 
 ````bash
 # open your config file for dehydrated

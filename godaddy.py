@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
+domain_hist = []
+HOOK_CHAIN = None
+
 
 def _get_zone(domain):
     d = get_tld(domain,as_object=True,fix_protocol=True)
@@ -33,14 +36,16 @@ def _get_subdomain_for(domain, zone):
     return subdomain
 
 
-def _update_dns(domain, token):
+def _set_token_in_dns(domain, token, do_update=False, tries=0):
+    global HOOK_CHAIN, domain_hist
+
     challengedomain = "_acme-challenge." + domain
     logger.info(" + Updating TXT record for {0} to '{1}'.".format(challengedomain, token))
     zone = _get_zone(challengedomain)
     # logger.info("Zone to update: {0}".format(zone))
     subdomain = _get_subdomain_for(challengedomain, zone)
     # logger.info("Subdomain name: {0}".format(subdomain))
-
+    
     record = {
         'name': subdomain,
         'data': token,
@@ -48,21 +53,60 @@ def _update_dns(domain, token):
         'type': 'TXT'
     }
 
-    existing_records = client.get_records(zone, record_type="TXT", name=subdomain)
-    if (len(existing_records) == 0):
-        result = client.add_record(zone, record)
-    else:
-        result = client.update_record(zone, record)
+    def __should_add():
+        if do_update: return False
+        if HOOK_CHAIN:
+            if domain in domain_hist:
+                domain_hist.append(domain)
+                return True
+            domain_hist.append(domain)
+            return False
+        return True if len(client.get_records(zone, record_type="TXT", name=subdomain)) == 0 else False
+
+    (verb, gd_api) = ['add', client.add_record] if __should_add() else ['update', client.update_record]
+
+    logger.info(" + {} TXT record for {}. token = '{}'.".format(
+        verb.capitalize(), challengedomain, token))
+
+    result=None
+    try:
+        result = gd_api(zone, record)
+    except godaddypy.client.BadResponse as err:
+        msg=str(err)
+        if msg.find('DUPLICATE_RECORD') > -1:
+            logger.info(" + . Duplicate record found. Skipping.")
+            return
+        logger.warn("Error returned during {}: {1}.".format(verb, err))
+    except Exception as err:
+        logger.warn("Error returned during {}: {}.".format(verb, err))
 
     if result is not True:
-        logger.warn("Error updating record for domain {0}.".format(domain))
+        logger.warn("Error {}ing record for domain {}.".format(verb, domain))
+        if tries < 3:
+            logger.warn("Will retry in 5 seconds...")
+            time.sleep(5)
+            _set_token_in_dns(domain, token, do_update, tries+1)
+        else:
+            logger.warn("Giving up after 3 tries {}ing dns...".format(verb))
+    else: # Success
+        logger.info(" + . Record {}".format('added' if verb == 'add' else "updated"))        
+        # Sleep between calls to avoid godaddy rate limits
+        # Acccording to their docs its 60 calls per minute
+        time.sleep(1)
 
 
 def create_txt_record(args):
+    global HOOK_CHAIN, domain_hist
+    # Note: This is a soft check that will only work for SAN certs. However, a incorrect result for non SAN certs will not cause problems in the logic.
+    HOOK_CHAIN = True if len(args) > 3 else False
+    logger.info("HOOK_CHAIN = {}".format(HOOK_CHAIN))
+    if HOOK_CHAIN == False:
+        logger.warn(" + Dehydrated may be running with HOOK_CHAIN disabled. Consider enabling HOOK_CHAIN for wildcard-support and improved performance.")
+
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
-        _update_dns(domain, token)
-    # a sleep is needed to allow DNS propagation
+        _set_token_in_dns(domain, token)
+    logger.info(" + Sleeping to wait for DNS propagation")
     time.sleep(30)
 
 
@@ -75,7 +119,7 @@ def delete_txt_record(args):
         if domain == "":
             logger.warn("Error deleting record, the domain argument is empty")
         else:
-            _update_dns(domain, "null")
+            _set_token_in_dns(domain, "(le_godaddy_dns) please delete me", do_update=True)
 
 
 def deploy_cert(args):
