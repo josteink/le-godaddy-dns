@@ -23,10 +23,11 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
-logger.warn("os.environ = {}".format(os.environ))
+#logger.warn("os.environ = {}".format(os.environ))
 
-LE_WILDCARD_SUPPORT = False if "LE_WILDCARD_SUPPORT" in os.environ and os.environ["LE_WILDCARD_SUPPORT"].lower() == "false" else True
-#logger.info("LE_WILDCARD_SUPPORT = {}".format(LE_WILDCARD_SUPPORT))
+domain_hist = None
+HOOK_CHAIN = None
+
 
 def _get_zone(domain):
     d = get_tld(domain,as_object=True,fix_protocol=True)
@@ -38,16 +39,16 @@ def _get_subdomain_for(domain, zone):
     return subdomain
 
 
-
 def _set_token_in_dns(domain, token, do_update=False, tries=0):
-    global LE_WILDCARD_SUPPORT
+    global HOOK_CHAIN, domain_hist
+
     challengedomain = "_acme-challenge." + domain
     logger.info(" + Updating TXT record for {0} to '{1}'.".format(challengedomain, token))
     zone = _get_zone(challengedomain)
     # logger.info("Zone to update: {0}".format(zone))
     subdomain = _get_subdomain_for(challengedomain, zone)
     # logger.info("Subdomain name: {0}".format(subdomain))
-
+        
     record = {
         'name': subdomain,
         'data': token,
@@ -55,22 +56,17 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
         'type': 'TXT'
     }
 
-    def __should_update():
-        if do_update: return True
-        if LE_WILDCARD_SUPPORT: return False
-        txt_records = client.get_records(zone, record_type="TXT", name=domain)
-        if len(txt_records) > 0:
-            if domain.find('*') > -1:
-                logger.warn("+ Warning - Wildcard URL dectected, but LE_WILDCARD_SUPPORT is set to False. If valiation fails, please set LE_WILDCARD_SUPPORT to True and run again.")
-            return True
-        return False
+    def __should_add():
+        if do_update: return False
+        if HOOK_CHAIN:
+            if domain in domain_hist:
+                domain_hist.append(domain)
+                return True
+            domain_hist.append(domain)
+            return False
+        return True if len(client.get_records(zone, record_type="TXT", name=subdomain)) == 0 else False
 
-    if __should_update():
-        verb='update'
-        gd_api = client.update_record
-    else:    
-        verb='add'
-        gd_api = client.add_record
+    (verb, gd_api) = ['add', client.add_record] if __should_add() else ['update', client.update_record]
 
     logger.info(" + {} TXT record for {}. token = '{}'.".format(
         verb.capitalize(), challengedomain, token))
@@ -96,13 +92,21 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
         else:
             logger.warn("Giving up after 3 tries {}ing dns...".format(verb))
     else: # Success
-        logger.info(" + . Record {}ed".format(verb))        
+        logger.info(" + . Record {}".format('added' if verb == 'add' else "updated"))        
         # Sleep between calls to avoid godaddy rate limits
         # Acccording to their docs its 60 calls per minute
         time.sleep(1)
 
 
 def create_txt_record(args):
+    global HOOK_CHAIN, domain_hist
+    HOOK_CHAIN = True if len(args) > 3 else False
+    logger.info("HOOK_CHAIN = {}".format(HOOK_CHAIN))
+    if HOOK_CHAIN: 
+        domain_hist=[]
+    else:
+        logger.warn(" + WARNING: le_godaddy_dns is not running in HOOK_CHAIN mode which does not support Wildcard SAN certificates. To get Wildcard support, please set HOOK_CHAIN=\"yes\" in your Dehydrated config file")
+
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
         _set_token_in_dns(domain, token)
