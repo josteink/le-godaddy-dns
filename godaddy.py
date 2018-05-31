@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
-domain_hist = None
+domain_hist = []
 HOOK_CHAIN = None
 
 
@@ -45,7 +45,7 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
     # logger.info("Zone to update: {0}".format(zone))
     subdomain = _get_subdomain_for(challengedomain, zone)
     # logger.info("Subdomain name: {0}".format(subdomain))
-        
+    
     record = {
         'name': subdomain,
         'data': token,
@@ -97,12 +97,13 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
 
 def create_txt_record(args):
     global HOOK_CHAIN, domain_hist
+    # Note: This is a soft check that will only work for SAN certs. However, a incorrect result for non SAN certs will not cause problems in the logic.
     HOOK_CHAIN = True if len(args) > 3 else False
     logger.info("HOOK_CHAIN = {}".format(HOOK_CHAIN))
-    if HOOK_CHAIN: 
-        domain_hist=[]
-    else:
-        logger.warn(" + WARNING: le_godaddy_dns is not running in HOOK_CHAIN mode which does not support Wildcard SAN certificates. To get Wildcard support, please set HOOK_CHAIN=\"yes\" in your Dehydrated config file")
+    if HOOK_CHAIN == False:
+        logger.warn(" + WARNING: HOOK_CHAIN may be disabled, and as such this script could fail validation for Wildcard SAN certificates.")
+        logger.warn("   If you are not registering a SAN Certificate, please disregard this warning.")
+        logger.warn("   To get Wildcard support, please set HOOK_CHAIN=\"yes\" in your Dehydrated config file")
 
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
