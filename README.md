@@ -56,13 +56,12 @@ example.com
 ...
 ````
 
-This step is optional, but recommended for reduced runtime 
-if you have many domains (SAN Cert.). Dehydrated gives you the option to 
-process multiple domains in wall call to the hook script, saving 
-resource overhead and pauses for dns propagation with each call. 
-Note however, that Dehydrated will first populate all challenges
-before verifying them in a second loop. This was not always the case but was
-implemented to correct some edge failures.
+## HOOK_CHAIN
+
+This step is required for wildcard certificates and is otherwise recommended 
+to reduced runtime if you have many domains (SAN Cert.). Dehydrated gives you
+the option to process multiple domains in wall call to the hook script, saving 
+resource overhead and pauses for dns propagation with each call.
 
 ````bash
 # open your config file for dehydrated
@@ -104,17 +103,6 @@ find . -name fullchain.pem -exec openssl x509 -in '{}' -subject -noout \;
 You may also decide to customize the `deploy_certificates` hook in
 `goddady.py` if you want the certificates automatically copied
 to another destination than the one provided by `letsencrypt.sh`.
-
-This program is presently designed to assume that users will be registering
-wildcard DNS. If you are not requesting wildcard certs, you can disable this by setting
-setting the enironment variable:
-````
-LE_WILDCARD_SUPPORT = False 
-````
-Note: By limitations in the GoDaddy API, This Wildcard Support mode outlined above will not 
-formally delete TXT records created for the Let's Encrypt validation process. We will however
-neuter their values with a generic text. Such TXT DNS records should not cause a problem and 
-can be deleted at any time after the dehydrated scripts are complete.
 
 # Disclaimer
 
