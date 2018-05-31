@@ -101,9 +101,7 @@ def create_txt_record(args):
     HOOK_CHAIN = True if len(args) > 3 else False
     logger.info("HOOK_CHAIN = {}".format(HOOK_CHAIN))
     if HOOK_CHAIN == False:
-        logger.warn(" + WARNING: HOOK_CHAIN may be disabled, and as such this script could fail validation for Wildcard SAN certificates.")
-        logger.warn("   If you are not registering a SAN Certificate, please disregard this warning.")
-        logger.warn("   To get Wildcard support, please set HOOK_CHAIN=\"yes\" in your Dehydrated config file")
+        logger.warn(" + Dehydrated may be running with HOOK_CHAIN disabled. Consider enabling HOOK_CHAIN for wildcard-support and improved performance.")
 
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
