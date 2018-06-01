@@ -31,7 +31,7 @@ def _get_zone(domain):
     return d.tld
 
 
-def _get_subdomain_for(domain, zone):
+def _get_subdomain(domain, zone):
     subdomain = domain[0:(-len(zone)-1)]
     return subdomain
 
@@ -40,11 +40,11 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
     global HOOK_CHAIN, domain_hist
 
     challengedomain = "_acme-challenge." + domain
-    logger.info(" + Updating TXT record for {0} to '{1}'.".format(challengedomain, token))
+    logger.info(" + Updating TXT record for {} to '{}'.".format(challengedomain, token))
     zone = _get_zone(challengedomain)
-    # logger.info("Zone to update: {0}".format(zone))
-    subdomain = _get_subdomain_for(challengedomain, zone)
-    # logger.info("Subdomain name: {0}".format(subdomain))
+    # logger.info("Zone to update: {}".format(zone))
+    subdomain = _get_subdomain(challengedomain, zone)
+    # logger.info("Subdomain name: {}".format(subdomain))
     
     record = {
         'name': subdomain,
@@ -76,7 +76,7 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
         if msg.find('DUPLICATE_RECORD') > -1:
             logger.info(" + . Duplicate record found. Skipping.")
             return
-        logger.warn("Error returned during {}: {1}.".format(verb, err))
+        logger.warn("Error returned during {}: {}.".format(verb, err))
     except Exception as err:
         logger.warn("Error returned during {}: {}.".format(verb, err))
 
@@ -124,20 +124,20 @@ def delete_txt_record(args):
 
 def deploy_cert(args):
     domain, privkey_pem, cert_pem, fullchain_pem, chain_pem, timestamp = args
-    logger.info(' + ssl_certificate: {0}'.format(fullchain_pem))
-    logger.info(' + ssl_certificate_key: {0}'.format(privkey_pem))
+    logger.info(' + ssl_certificate: {}'.format(fullchain_pem))
+    logger.info(' + ssl_certificate_key: {}'.format(privkey_pem))
     return
 
 
 def invalid_challenge(args):
     [domain, response] = args
-    logger.warn(" + invalid challenge for domain {0}: {1}".format(domain, response))
+    logger.warn(" + invalid challenge for domain {}: {}".format(domain, response))
     return
 
 
 def request_failure(args):
     [status_code, err_txt, req_type] = args
-    logger.warn(" + Request failed with status code: {0}, {1}, type: {2}".format(status_code, err_txt, req_type))
+    logger.warn(" + Request failed with status code: {}, {}, type: {}".format(status_code, err_txt, req_type))
     return
 
 
@@ -154,7 +154,7 @@ def main(argv):
     if opname not in ops:
         return
     else:
-        logger.info(" + Godaddy hook executing: {0}".format(opname))
+        logger.info(" + Godaddy hook executing: {}".format(opname))
         ops[opname](argv[1:])
 
 
