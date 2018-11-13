@@ -40,7 +40,7 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
     global HOOK_CHAIN, domain_hist
 
     challengedomain = "_acme-challenge." + domain
-    logger.info(" + Updating TXT record for {} to '{}'.".format(challengedomain, token))
+    logger.info(" + add -or- update TXT '{}' to '{}'.".format(challengedomain, token))
     zone = _get_zone(challengedomain)
     # logger.info("Zone to update: {}".format(zone))
     subdomain = _get_subdomain(challengedomain, zone)
@@ -65,8 +65,8 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
 
     (verb, gd_api) = ['add', client.add_record] if __should_add() else ['update', client.update_record]
 
-    logger.info(" + {} TXT record for {}. token = '{}'.".format(
-        verb.capitalize(), challengedomain, token))
+    logger.info(" + {} TXT record for {} | token = '{}' | zone = '{}' | godaddypy rec = '{}'".format(
+        verb.capitalize(), challengedomain, token, zone, record))
 
     result=None
     try:
