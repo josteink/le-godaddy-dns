@@ -19,8 +19,8 @@ my_acct = godaddypy.Account(api_key=api_key, api_secret=api_secret)
 client = godaddypy.Client(my_acct)
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 domain_hist = []
 HOOK_CHAIN = None
