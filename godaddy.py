@@ -28,7 +28,7 @@ HOOK_CHAIN = None
 
 def _get_zone(domain):
     d = get_tld(domain,as_object=True,fix_protocol=True)
-    return d.tld
+    return d.fld
 
 
 def _get_subdomain(domain, zone):
