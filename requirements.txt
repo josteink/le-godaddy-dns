@@ -1,7 +1,7 @@
 certifi==2019.11.28
 chardet==3.0.4
 GoDaddyPy==2.2.7
-idna==2.8
+idna==2.9
 requests==2.22.0
 urllib3==1.25.8
 tld==0.11.10
