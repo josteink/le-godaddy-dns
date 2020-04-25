@@ -4,4 +4,4 @@ GoDaddyPy==2.2.7
 idna==2.9
 requests==2.23.0
 urllib3==1.25.8
-tld==0.12
+tld==0.12.1
