@@ -76,18 +76,18 @@ def _set_token_in_dns(domain, token, do_update=False, tries=0):
         if msg.find('DUPLICATE_RECORD') > -1:
             logger.info(" + . Duplicate record found. Skipping.")
             return
-        logger.warn("Error returned during {}: {}.".format(verb, err))
+        logger.warning("Error returned during {}: {}.".format(verb, err))
     except Exception as err:
-        logger.warn("Error returned during {}: {}.".format(verb, err))
+        logger.warning("Error returned during {}: {}.".format(verb, err))
 
     if result is not True:
-        logger.warn("Error {}ing record for domain {}.".format(verb, domain))
+        logger.warning("Error {}ing record for domain {}.".format(verb, domain))
         if tries < 3:
-            logger.warn("Will retry in 5 seconds...")
+            logger.warning("Will retry in 5 seconds...")
             time.sleep(5)
             _set_token_in_dns(domain, token, do_update, tries+1)
         else:
-            logger.warn("Giving up after 3 tries {}ing dns...".format(verb))
+            logger.warning("Giving up after 3 tries {}ing dns...".format(verb))
     else: # Success
         logger.info(" + . Record {}".format('added' if verb == 'add' else "updated"))        
         # Sleep between calls to avoid godaddy rate limits
@@ -101,7 +101,7 @@ def create_txt_record(args):
     HOOK_CHAIN = True if len(args) > 3 else False
     logger.info("HOOK_CHAIN = {}".format(HOOK_CHAIN))
     if HOOK_CHAIN == False:
-        logger.warn(" + Dehydrated may be running with HOOK_CHAIN disabled. Consider enabling HOOK_CHAIN for wildcard-support and improved performance.")
+        logger.warning(" + Dehydrated may be running with HOOK_CHAIN disabled. Consider enabling HOOK_CHAIN for wildcard-support and improved performance.")
 
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
@@ -117,7 +117,7 @@ def delete_txt_record(args):
         # https://github.com/eXamadeus/godaddypy/issues/13
 
         if domain == "":
-            logger.warn("Error deleting record, the domain argument is empty")
+            logger.warning("Error deleting record, the domain argument is empty")
         else:
             _set_token_in_dns(domain, "(le_godaddy_dns) please delete me", do_update=True)
 
@@ -131,16 +131,16 @@ def deploy_cert(args):
 
 def invalid_challenge(args):
     [domain, response] = args
-    logger.warn(" + invalid challenge for domain {}: {}".format(domain, response))
+    logger.warning(" + invalid challenge for domain {}: {}".format(domain, response))
     return
 
 
 def request_failure(args):
     if not len(args) == 4:
-        logger.warn(" + godaddy.py::request_failure() Request failed however args length != 4. Was expecting [status_code, err_txt, req_type, err_headers]. args = {}".format(args))    
+        logger.warning(" + godaddy.py::request_failure() Request failed however args length != 4. Was expecting [status_code, err_txt, req_type, err_headers]. args = {}".format(args))    
     else:
         [status_code, err_txt, req_type, err_headers] = args
-        logger.warn(" + Request failed with status code: {}, {}, type: {}, headers: {}".format(status_code, err_txt, req_type, err_headers))
+        logger.warning(" + Request failed with status code: {}, {}, type: {}, headers: {}".format(status_code, err_txt, req_type, err_headers))
     return
 
 
