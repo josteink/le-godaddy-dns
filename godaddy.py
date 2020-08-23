@@ -137,7 +137,7 @@ def invalid_challenge(args):
 
 def request_failure(args):
     if not len(args) == 4:
-        logger.warn(" + godaddy.py::request_failure() Request failed however args length <> 3. Was expecting [status_code, err_txt, req_type, err_headers]. args = {}".format(args))    
+        logger.warn(" + godaddy.py::request_failure() Request failed however args length != 4. Was expecting [status_code, err_txt, req_type, err_headers]. args = {}".format(args))    
     else:
         [status_code, err_txt, req_type, err_headers] = args
         logger.warn(" + Request failed with status code: {}, {}, type: {}, headers: {}".format(status_code, err_txt, req_type, err_headers))
