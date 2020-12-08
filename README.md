@@ -1,7 +1,7 @@
 
 # le-godaddy-dns
 
-[![Build Status](https://travis-ci.org/josteink/le-godaddy-dns.svg?branch=master)](https://travis-ci.org/josteink/le-godaddy-dns)
+![CI](https://github.com/josteink/le-godaddy-dns/workflows/CI/badge.svg)
 
 le-godaddy-dns is a [Let's encrypt](https://letsencrypt.org/) module,
 designed to be used as a hook with
