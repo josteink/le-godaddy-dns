@@ -74,15 +74,21 @@ nano $ROOTDIR/dehydrated/config
 HOOK_CHAIN="yes"
 ````
 
+### Convigure Godaddy Auth API Keys as Environment Variables:
+
+````bash
+export GD_KEY=your_key_here
+export GD_SECRET=your_secret_here
+````
+
+
 Now you need to configure `le-godaddy-dns` and retrieve your certs.
 
 ````bash
-# configure your API keys
-export GD_KEY=your_key_here
-export GD_SECRET=your_secret_here
+cd $ROOTDIR/dehydrated
 
-# run letsencrypt.sh in "cron" mode (-c)
-# this creates CSRs, keys and everything we need automatically for us.
+# run letsencrypt.sh in "cron" mode (-c) this creates CSRs, 
+# keys and everything we need automatically.
 ./dehydrated --challenge dns-01 -k $ROOTDIR/le-godaddy-dns/godaddy.py -c
 
 ````
