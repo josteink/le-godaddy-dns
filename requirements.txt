@@ -1,5 +1,5 @@
 certifi==2023.7.22
-chardet==5.1.0
+chardet==5.2.0
 GoDaddyPy==2.4.1
 idna==3.4
 requests==2.31.0
