@@ -3,5 +3,5 @@ chardet==5.2.0
 GoDaddyPy==2.4.1
 idna==3.7
 requests==2.32.2
-urllib3==2.0.7
+urllib3==2.2.1
 tld==0.13
