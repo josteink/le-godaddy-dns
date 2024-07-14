@@ -74,13 +74,21 @@ nano $ROOTDIR/dehydrated/config
 HOOK_CHAIN="yes"
 ````
 
-### Convigure Godaddy Auth API Keys as Environment Variables:
+### Configure Godaddy Auth API Keys as Environment Variables:
 
 ````bash
+# configure your API keys
 export GD_KEY=your_key_here
 export GD_SECRET=your_secret_here
 ````
 
+#### Other Options
+`GODADDY_DNS_SLEEP` - override [default TXT update wait time](https://github.com/josteink/le-godaddy-dns/issues/141) in seconds (default/min is 30s)
+````bash
+export GODADDY_DNS_SLEEP=60
+````
+
+### Running The Script
 
 Now you need to configure `le-godaddy-dns` and retrieve your certs.
 

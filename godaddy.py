@@ -106,8 +106,16 @@ def create_txt_record(args):
     for i in range(0, len(args), 3):
         domain, token = args[i], args[i+2]
         _set_token_in_dns(domain, token)
-    logger.info(" + Sleeping to wait for DNS propagation")
-    time.sleep(30)
+
+    GODADDY_DNS_SLEEP = 30
+    try:
+        _tmp = int(os.environ["GODADDY_DNS_SLEEP"])
+        if _tmp > GODADDY_DNS_SLEEP: GODADDY_DNS_SLEEP = _tmp
+    except Exception as ex:
+        pass
+
+    logger.info(f" + Sleeping for {GODADDY_DNS_SLEEP}s to wait for DNS propagation")
+    time.sleep(GODADDY_DNS_SLEEP)
 
 
 def delete_txt_record(args):
