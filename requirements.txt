@@ -3,7 +3,7 @@ chardet==5.2.0
 GoDaddyPy==2.5.1
 pyyaml==6.0.2 # dep for configloader
 configloader==1.0.1
-idna==3.9
+idna==3.10
 requests==2.32.3
 urllib3==2.2.3
 tld==0.13
