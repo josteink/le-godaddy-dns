@@ -5,5 +5,5 @@ pyyaml==6.0.2 # dep for configloader
 configloader==1.0.1
 idna==3.10
 requests==2.32.3
-urllib3==2.3.0
+urllib3==2.4.0
 tld==0.13
