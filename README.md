@@ -1,7 +1,7 @@
 
 # le-godaddy-dns
 
-![CI](https://github.com/josteink/le-godaddy-dns/workflows/CI/badge.svg)
+[![CI](https://github.com/josteink/le-godaddy-dns/actions/workflows/ci.yml/badge.svg)](https://github.com/josteink/le-godaddy-dns/actions/workflows/ci.yml)
 
 le-godaddy-dns is a [Let's encrypt](https://letsencrypt.org/) module,
 designed to be used as a hook with
