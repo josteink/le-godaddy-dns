@@ -1,4 +1,4 @@
-certifi==2025.11.12
+certifi==2026.1.4
 chardet==5.2.0
 GoDaddyPy==2.5.1
 pyyaml==6.0.3 # dep for configloader
