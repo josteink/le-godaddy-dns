@@ -5,13 +5,21 @@ PYCS = $(PYS:.py=.pyc)
 
 all: $(PYCS) test
 
-test:
-	+ $(PYTHON) -m unittest discover -v
-
-%.pyc: %.py
-	$(PYTHON) -m py_compile $<
-
 clean:
-	rm -rf __pycache__ $(PYCS)
+	rm -rf __pycache__ $(PYCS) .venv
+
+.venv/ready:
+	$(PYTHON) -m venv .venv
+	touch $@
+
+deps: .venv/ready
+	.venv/bin/python -m pip install -r requirements.txt
+
+test: deps
+	+ .venv/bin/python -m unittest discover -v
+
+%.pyc: %.py deps
+	.venv/bin/python -m py_compile $<
+
 
 # end
